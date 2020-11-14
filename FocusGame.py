@@ -100,8 +100,9 @@ class FocusGame:
         # create 6x6 board with alternating pairs of red/green spots
         self._board = FocusBoard(board_length=6, pattern=2).get_board()
 
-        # set maximum stack height
+        # optional settings: maximum stack height and number of captures to win
         self._MAX_STACK = 5
+        self._WINNING_CAPTURE_COUNT = 6
 
     def show_pieces(self, position):
         """
@@ -127,26 +128,6 @@ class FocusGame:
         """
         return self._players[player_name]['captured']
 
-    def update_stack_at_position(self, position):
-        """
-        if a position's stack is > stack max, processes reserve or capture for bottom piece, as appropriate
-        :param position: tuple representing board coordinate in (row, column) format
-        """
-        # TODO: handle moving more than one (see "Reserving and Capturing Pieces" in readme)
-
-        stack = self.show_pieces(position)
-        bottom_color = stack[0]
-        active_player_color = self._players[self._player_turn]['color']
-        consequence = 'captured'
-        if len(stack) > self._MAX_STACK:
-            # if bottom piece belongs to player making move, send to reserve
-            # else, bottom piece belongs to opponent. Make capture
-            if bottom_color == active_player_color:
-                consequence = 'reserved'
-
-            self._players[self._player_turn][consequence] += 1
-            self.remove_bottom_from(position)
-
     def remove_bottom_from(self, position):
         """
         removes bottom piece from a stack at given position
@@ -165,8 +146,19 @@ class FocusGame:
         x, y = position
         self._board[x][y].append(color_abbreviation)
 
-        # a piece has been placed!
-        self.update_stack_at_position(position)
+        # a piece has been placed! TODO: handle multiple pieces
+        stack = self.show_pieces(position)
+        bottom_color = stack[0]
+        active_player_color = self._players[self._player_turn]['color']
+        consequence = 'captured'
+        if len(stack) > self._MAX_STACK:
+            # if bottom piece belongs to player making move, send to reserve
+            # else, bottom piece belongs to opponent. Make capture
+            if bottom_color == active_player_color:
+                consequence = 'reserved'
+
+            self._players[self._player_turn][consequence] += 1
+            self.remove_bottom_from(position)
 
     def is_in_board(self, position):
         """
@@ -226,7 +218,20 @@ class FocusGame:
             return 'invalid location'
 
         # enforce valid number of pieces moved
+        if pieces_moved != len(self.show_pieces(from_position)):
+            return 'invalid number of pieces'
 
+        # move is valid--process the move
+        # remove from bottom
+
+        # add atop
+
+        # check if this was the winning move, and congratulate the winner if so
+        if self._players[player_name]['captured'] >= self._WINNING_CAPTURE_COUNT:
+            return 'Wins'
+
+        # completed a successful normal move
+        return 'successfully moved'
 
 
 # test
@@ -240,5 +245,4 @@ p2_reserve = game.show_reserve('ralph')
 p1_captured = game.show_captured('george')
 p2_captured = game.show_captured('ralph')
 game.move_piece('george')
-game.update_stack_at_position((0, 1))
 print(0)
