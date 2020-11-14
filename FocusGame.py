@@ -92,8 +92,10 @@ class FocusGame:
         :param player_2_info: tuple with player 2 name and color abbreviation. E.g., ('Ralph', 'R')
         """
         # hold player info
-        self._player_1 = {'name': player_1_info[0], 'color': player_1_info[1].upper()}
-        self._player_2 = {'name': player_2_info[0], 'color': player_2_info[1].upper()}
+        self._players = {
+            player_1_info[0]: {'color': player_1_info[1].upper(), 'reserve': 0},
+            player_2_info[0]: {'color': player_2_info[1].upper(), 'reserve': 0}
+        }
 
         # create 6x6 board with alternating pairs of red/green spots
         self._board = FocusBoard(board_length=6, pattern=2).get_board()
@@ -101,10 +103,18 @@ class FocusGame:
     def show_pieces(self, position):
         """
         :param position: tuple representing board coordinate in (row, column) format
-        :return stack: list of pieces at the given position, with index 0 as bottom
+        :return: list of pieces at the given position, with index 0 as bottom
         """
         x, y = position
         return self._board[x][y]
+
+    def show_reserve(self, player_name):
+        """
+        shows the count of pieces that are in reserve for the given player
+        :param player_name: name of player to check, as given to constructor
+        :return: count of pieces in reserve for the player
+        """
+        return self._players[player_name]['reserve']
 
 
 # test
@@ -113,4 +123,6 @@ p2 = ('ralph', 'R')
 game = FocusGame(p1, p2)
 stack_at_origin = game.show_pieces((0, 0))
 stack_here = game.show_pieces((5, 5))
+p1_reserve = game.show_reserve('george')
+p2_reserve = game.show_reserve('ralph')
 print(0)
