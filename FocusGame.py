@@ -78,6 +78,10 @@ class FocusBoard:
 
         return row
 
+    def get_board(self):
+        """ returns the whole board, which is a 3D list """
+        return self._board
+
 
 class FocusGame:
     """ facilitates playing Focus/Domination """
@@ -92,12 +96,21 @@ class FocusGame:
         self._player_2 = {'name': player_2_info[0], 'color': player_2_info[1].upper()}
 
         # create 6x6 board with alternating pairs of red/green spots
-        self._board = FocusBoard(board_length=6, pattern=2)
+        self._board = FocusBoard(board_length=6, pattern=2).get_board()
 
+    def show_pieces(self, position):
+        """
+        :param position: tuple representing board coordinate in (row, column) format
+        :return stack: list of pieces at the given position, with index 0 as bottom
+        """
+        x, y = position
+        return self._board[x][y]
 
 
 # test
 p1 = ('george', 'G')
 p2 = ('ralph', 'R')
 game = FocusGame(p1, p2)
-
+stack_at_origin = game.show_pieces((0, 0))
+stack_here = game.show_pieces((5, 5))
+print(0)
