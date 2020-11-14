@@ -7,7 +7,7 @@ class FocusBoard:
     Represents the board of a game of Focus/Domination
     Can be customized beyond the official board's parameters
     """
-    def __init__(self, board_length=6, pattern=2):
+    def __init__(self, board_length=6, pattern=5):
         """
         creates game board
         :param board_length: width and height of board
@@ -16,6 +16,7 @@ class FocusBoard:
         self._board = []
 
         # construct the number of columns called for by board_length
+        starting_color = 'R'
         for column_index in range(board_length):
             # optimize loop if the given pattern evenly divides rows
             pattern_range = int(board_length / pattern) if board_length % pattern == 0 else board_length
@@ -23,22 +24,26 @@ class FocusBoard:
 
             # construct a row
             if using_efficient_method:
-                row = self.make_row_efficiently(pattern_range, pattern)
+                row = self.make_row_efficiently(pattern_range, pattern, starting_color)
             else:
-                row = self.make_row_basic(pattern_range, pattern)
+                row = self.make_row_basic(pattern_range, pattern, starting_color)
 
             # add the completed row to the board
             self._board.append(row)
 
-    def make_row_efficiently(self, pattern_range, pattern):
+            # alternate starting color
+            starting_color = 'R' if starting_color == 'G' else 'G'
+
+    def make_row_efficiently(self, pattern_range, pattern, starting_color):
         """
         generates a row based on desired pattern
         :param pattern_range: used to reduce iterations; int(board_length / pattern)
         :param pattern: for initial pattern; number of same color to place (left-to-right) before switching colors
+        :param starting_color: either 'R' or 'G'; which color to place first, at the left of the row
         :return row: the generated row
         """
         row = []
-        alternate = 'R'
+        alternate = starting_color
 
         for row_index in range(pattern_range):
             if alternate == 'R':
@@ -50,35 +55,26 @@ class FocusBoard:
 
         return row
 
-    def make_row_basic(self, pattern_range, pattern):
+    def make_row_basic(self, pattern_range, pattern, starting_color):
         """
         generates a row based on desired pattern
         :param pattern_range:
         :param pattern:
+        :param starting_color: either 'R' or 'G'; which color to place first, at the left of the row
         :return row: the generated row
         """
         row = []
-        red_count = 0
-        green_count = 0
+        count = 0
+        alternate = starting_color
 
         for row_index in range(pattern_range):
-            # if adding red
-            if red_count < pattern:
-                row.append(['R'])
+            row.append([alternate])
 
-                # hey, we just added a red piece. Maintain counter
-                red_count += 1
-                if red_count > pattern:
-                    red_count = 0
-
-            # if adding green
-            elif green_count < pattern:
-                row.append(['G'])
-
-                # hey, we just added a green piece
-                green_count += 1
-                if green_count > pattern:
-                    green_count = 0
+            # hey, we just added a piece. Maintain counter
+            count += 1
+            if count >= pattern:  # if done with red
+                count = 0
+                alternate = 'G' if alternate == 'R' else 'R'
 
         return row
 
