@@ -68,7 +68,7 @@ class FocusBoard:
 
                 # hey, we just added a red piece. Maintain counter
                 red_count += 1
-                if red_count >= pattern:
+                if red_count > pattern:
                     red_count = 0
 
             # if adding green
@@ -77,8 +77,10 @@ class FocusBoard:
 
                 # hey, we just added a green piece
                 green_count += 1
-                if green_count >= pattern:
+                if green_count > pattern:
                     green_count = 0
+
+        return row
 
 
 class FocusGame:
