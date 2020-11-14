@@ -44,7 +44,6 @@ class FocusBoard:
         """
         row = []
         alternate = starting_color
-
         for row_index in range(pattern_range):
             if alternate == 'R':
                 row.extend([['R'] for r in range(pattern)])  # append R's called for by pattern
@@ -66,7 +65,6 @@ class FocusBoard:
         row = []
         count = 0
         alternate = starting_color
-
         for row_index in range(pattern_range):
             row.append([alternate])
 
@@ -93,12 +91,17 @@ class FocusGame:
         """
         # hold player info
         self._players = {
-            player_1_info[0]: {'color': player_1_info[1].upper(), 'reserve': 0, 'captured': 0},
-            player_2_info[0]: {'color': player_2_info[1].upper(), 'reserve': 0, 'captured': 0}
+            player_1_info[0]: {'color': player_1_info[1].upper(), 'reserved': 0, 'captured': 0},
+            player_2_info[0]: {'color': player_2_info[1].upper(), 'reserved': 0, 'captured': 0}
         }
+
+        self._player_turn = None
 
         # create 6x6 board with alternating pairs of red/green spots
         self._board = FocusBoard(board_length=6, pattern=2).get_board()
+
+        # set maximum stack height
+        self._MAX_STACK = 5
 
     def show_pieces(self, position):
         """
@@ -114,7 +117,7 @@ class FocusGame:
         :param player_name: name of player to check, as given to constructor
         :return: count of pieces in reserve for the player
         """
-        return self._players[player_name]['reserve']
+        return self._players[player_name]['reserved']
 
     def show_captured(self, player_name):
         """
@@ -123,6 +126,40 @@ class FocusGame:
         :return: count of pieces captured by the player
         """
         return self._players[player_name]['captured']
+
+    def update_stack_at_position(self, position):
+        """
+        if a position's stack is > stack max, processes reserve or capture for bottom piece, as appropriate
+        :param position: tuple representing board coordinate in (row, column) format
+        """
+        stack = self.show_pieces(position)
+        bottom_color = stack[0]
+        active_player_color = self._players[self._player_turn]['color']
+        consequence = 'captured'
+        if len(stack) > self._MAX_STACK:
+            # if bottom piece belongs to player making move, send to reserve
+            # else, bottom piece belongs to opponent. Make capture
+            if bottom_color == active_player_color:
+                consequence = 'reserved'
+
+            self._players[self._player_turn][consequence] += 1
+            self.remove_bottom_from(position)
+
+    def remove_bottom_from(self, position):
+        """
+        removes bottom piece from a stack at given position
+        :param position: tuple representing board coordinate in (row, column) format
+        """
+        x, y = position
+        del(self._board[x][y][0])
+
+    def move_piece(self, player_name):
+
+        # enforce valid move
+
+        if self._player_turn is None:
+            self._player_turn = player_name
+
 
 # test
 p1 = ('george', 'G')
@@ -134,4 +171,6 @@ p1_reserve = game.show_reserve('george')
 p2_reserve = game.show_reserve('ralph')
 p1_captured = game.show_captured('george')
 p2_captured = game.show_captured('ralph')
+game.move_piece('george')
+game.update_stack_at_position((0, 1))
 print(0)
