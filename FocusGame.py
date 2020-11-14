@@ -93,8 +93,8 @@ class FocusGame:
         """
         # hold player info
         self._players = {
-            player_1_info[0]: {'color': player_1_info[1].upper(), 'reserve': 0},
-            player_2_info[0]: {'color': player_2_info[1].upper(), 'reserve': 0}
+            player_1_info[0]: {'color': player_1_info[1].upper(), 'reserve': 0, 'captured': 0},
+            player_2_info[0]: {'color': player_2_info[1].upper(), 'reserve': 0, 'captured': 0}
         }
 
         # create 6x6 board with alternating pairs of red/green spots
@@ -116,6 +116,13 @@ class FocusGame:
         """
         return self._players[player_name]['reserve']
 
+    def show_captured(self, player_name):
+        """
+        shows the count of pieces that have been captured by the given player
+        :param player_name: name of player to check, as given to constructor
+        :return: count of pieces captured by the player
+        """
+        return self._players[player_name]['captured']
 
 # test
 p1 = ('george', 'G')
@@ -125,4 +132,6 @@ stack_at_origin = game.show_pieces((0, 0))
 stack_here = game.show_pieces((5, 5))
 p1_reserve = game.show_reserve('george')
 p2_reserve = game.show_reserve('ralph')
+p1_captured = game.show_captured('george')
+p2_captured = game.show_captured('ralph')
 print(0)
