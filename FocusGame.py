@@ -153,6 +153,41 @@ class FocusGame:
         x, y = position
         del(self._board[x][y][0])
 
+    def place_atop_safely(self, position, color_abbreviation):
+        """
+        places a piece atop a stack at given position
+        :param position: tuple representing board coordinate in (row, column) format
+        :param color_abbreviation: capital letter representing the color of piece to be placed
+        """
+        x, y = position
+        self._board[x][y].append(color_abbreviation)
+
+        # a piece has been placed!
+        self.update_stack_at_position(position)
+
+    def reserved_move(self, player_name, position):
+        """
+        makes a move using given player's reserve
+        :param player_name: name of player to check, as given to constructor
+        :param position: tuple representing board coordinate in (row, column) format
+        :return:
+        """
+
+        # enforce player turns, or call from move_piece()?
+        if player_name != self._player_turn:
+            return 'not your turn, pumpkin-eater'
+
+        # If there are no pieces in reserve, return 'no pieces in reserve'
+        if self._players[player_name]['reserve'] == 0:
+            return 'no pieces in reserve'
+
+        # move is valid--add player's piece to board
+        active_player_piece = self._players[self._player_turn]['color']
+        self.place_atop_safely(position, active_player_piece)
+
+        # remove piece from reserve
+        self._players[player_name]['reserve'] -= 1
+
     def move_piece(self, player_name):
 
         # enforce valid move
