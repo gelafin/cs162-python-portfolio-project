@@ -7,7 +7,7 @@ class FocusBoard:
     Represents the board of a game of Focus/Domination
     Can be customized beyond the official board's parameters
     """
-    def __init__(self, board_length=6, pattern=5):
+    def __init__(self, board_length=6, pattern=2):
         """
         creates game board
         :param board_length: width and height of board
@@ -82,17 +82,18 @@ class FocusBoard:
 class FocusGame:
     """ facilitates playing Focus/Domination """
     def __init__(self, player_1_info, player_2_info):
-        """ creates game board and tracks player colors """
+        """
+        initializes game board and records player info
+        :param player_1_info: tuple with player 1 name and color abbreviation. E.g., ('George', 'G')
+        :param player_2_info: tuple with player 2 name and color abbreviation. E.g., ('Ralph', 'R')
+        """
         # hold player info
-        self._player_1 = {}
-        self._player_2 = {}
-        (self._player_1['name'], self._player_1['color']) = player_1_info
-        (self._player_2['name'], self._player_2['color']) = player_2_info
+        self._player_1 = {'name': player_1_info[0], 'color': player_1_info[1].upper()}
+        self._player_2 = {'name': player_2_info[0], 'color': player_2_info[1].upper()}
 
         # create 6x6 board with alternating pairs of red/green spots
-        self._board = FocusBoard()
+        self._board = FocusBoard(board_length=6, pattern=2)
 
-        print('glo')
 
 
 # test
