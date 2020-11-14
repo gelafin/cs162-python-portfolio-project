@@ -132,6 +132,8 @@ class FocusGame:
         if a position's stack is > stack max, processes reserve or capture for bottom piece, as appropriate
         :param position: tuple representing board coordinate in (row, column) format
         """
+        # TODO: handle moving more than one (see "Reserving and Capturing Pieces" in readme)
+
         stack = self.show_pieces(position)
         bottom_color = stack[0]
         active_player_color = self._players[self._player_turn]['color']
@@ -150,6 +152,7 @@ class FocusGame:
         removes bottom piece from a stack at given position
         :param position: tuple representing board coordinate in (row, column) format
         """
+        # TODO: handle more than one
         x, y = position
         del(self._board[x][y][0])
 
@@ -165,6 +168,24 @@ class FocusGame:
         # a piece has been placed!
         self.update_stack_at_position(position)
 
+    def is_in_board(self, position):
+        """
+        checks whether a position is a playable point on the board
+        :param position:
+        :return: True if position is playable; False otherwise
+        """
+        x, y = position
+
+        # check if y is out of column range
+        if y < 0 or y > len(self._board) - 1:  # comparing to 0-based index
+            return False
+        # check if x is out of row range
+        if x < 0 or x > len(self._board[0]) - 1:  # comparing to 0-based index
+            return False
+
+        # passed all checks
+        return True
+
     def reserved_move(self, player_name, position):
         """
         makes a move using given player's reserve
@@ -172,28 +193,40 @@ class FocusGame:
         :param position: tuple representing board coordinate in (row, column) format
         :return:
         """
-
-        # enforce player turns, or call from move_piece()?
+        # enforce player turns like this, or call from move_piece()?
         if player_name != self._player_turn:
-            return 'not your turn, pumpkin-eater'
+            return 'not your turn'
 
         # If there are no pieces in reserve, return 'no pieces in reserve'
         if self._players[player_name]['reserve'] == 0:
             return 'no pieces in reserve'
 
         # move is valid--add player's piece to board
-        active_player_piece = self._players[self._player_turn]['color']
+        active_player_piece = self._players[player_name]['color']
         self.place_atop_safely(position, active_player_piece)
 
-        # remove piece from reserve
+        # update reserve count
         self._players[player_name]['reserve'] -= 1
 
-    def move_piece(self, player_name):
-
-        # enforce valid move
+    def move_piece(self, player_name, from_position, to_position, pieces_moved):
 
         if self._player_turn is None:
             self._player_turn = player_name
+
+        # enforce valid turn
+        if self._player_turn != player_name:
+            return 'not your turn'
+
+        # enforce valid from_position; player controls top of stack at from_position
+        if self.show_pieces(from_position)[-1] != self._players[player_name]['color']:
+            return 'invalid location'
+
+        # enforce valid to_position
+        if not self.is_in_board(to_position):
+            return 'invalid location'
+
+        # enforce valid number of pieces moved
+
 
 
 # test
