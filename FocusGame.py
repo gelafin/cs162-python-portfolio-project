@@ -104,6 +104,12 @@ class FocusGame:
         self._MAX_STACK = 5
         self._WINNING_CAPTURE_COUNT = 6
 
+        self._ERROR_MESSAGES = {
+            'invalid_location': 'invalid location',
+            'invalid_number_of_pieces': 'invalid number of pieces',
+            'invalid_player_turn': 'not your turn'
+        }
+
     def show_pieces(self, position):
         """
         :param position: tuple representing board coordinate in (row, column) format
@@ -200,26 +206,49 @@ class FocusGame:
         # update reserve count
         self._players[player_name]['reserve'] -= 1
 
-    def move_piece(self, player_name, from_position, to_position, pieces_moved):
+    def position_is_in_stack_range(self, stack_position, to_position):
+        """
+        determines whether a given position is within legal move range of a stack at a given position
+        :param stack_position:
+        :param to_position:
+        :return: True if to_position is within legal move range of the stack; False otherwise
+        """
+        move_range = len(self.show_pieces(stack_position))
+        from_x, from_y = stack_position
+        to_x, to_y = to_position
+        distance_x = from_x - to_x  # guaranteed to both be non-negative
+        distance_y = from_y - to_y  # guaranteed to both be non-negative
+        total_distance = distance_x + distance_y
 
+        if total_distance > move_range:  # moving more spaces than allowed?
+            return False
+
+        # passed all tests; to_position is within legal move range
+        return True
+
+    def move_piece(self, player_name, from_position, to_position, pieces_moved):
         if self._whose_turn is None:
             self._whose_turn = player_name
 
         # enforce valid turn
         if self._whose_turn != player_name:
-            return 'not your turn'
+            return self._ERROR_MESSAGES['invalid_player_turn']
 
         # enforce valid from_position; player controls top of stack at from_position
         if self.show_pieces(from_position)[-1] != self._players[player_name]['color']:
-            return 'invalid location'
+            return self._ERROR_MESSAGES['invalid_location']
 
         # enforce valid to_position; to_position is within bounds
         if not self.is_in_board(to_position):
-            return 'invalid location'
+            return self._ERROR_MESSAGES['invalid_location']
+
+        # enforce valid to_position; to_position is within legal range
+        if not self.position_is_in_stack_range(from_position, to_position):
+            return self._ERROR_MESSAGES['invalid_location']
 
         # enforce valid number of pieces moved
         if pieces_moved > len(self.show_pieces(from_position)):
-            return 'invalid number of pieces'
+            return self._ERROR_MESSAGES['invalid_number_of_pieces']
 
         # move is valid--process the move
         # remove from bottom
