@@ -101,13 +101,17 @@ class FocusGame:
         self._board = FocusBoard(board_length=6, pattern=2).get_board()
 
         # optional settings: maximum stack height and number of captures to win
-        self._MAX_STACK = 5
+        self._MAX_STACK_HEIGHT = 5
         self._WINNING_CAPTURE_COUNT = 6
 
         self._ERROR_MESSAGES = {
             'invalid_location': 'invalid location',
             'invalid_number_of_pieces': 'invalid number of pieces',
             'invalid_player_turn': 'not your turn'
+        }
+
+        self._CONFIRMATION_MESSAGES = {
+            'move_success': 'successfully moved'
         }
 
     def show_pieces(self, position):
@@ -134,14 +138,14 @@ class FocusGame:
         """
         return self._players[player_name]['captured']
 
-    def remove_bottom_from(self, position):
+    def remove_pieces_from_bottom(self, position, number_to_remove):
         """
         removes bottom piece from a stack at given position
         :param position: tuple representing board coordinate in (row, column) format
+        :param number_to_remove: how many pieces to remove
         """
-        # TODO: handle more than one
         x, y = position
-        del(self._board[x][y][0])
+        self._board[x][y] = self._board[x][y][number_to_remove:]  # remove from front (bottom)
 
     def place_atop_safely(self, position, color_abbreviation):
         """
@@ -152,19 +156,23 @@ class FocusGame:
         x, y = position
         self._board[x][y].append(color_abbreviation)
 
-        # a piece has been placed! TODO: handle multiple pieces
+        # a piece has been placed! process the consequence based on game rules
         stack = self.show_pieces(position)
         bottom_color = stack[0]
         active_player_color = self._players[self._whose_turn]['color']
-        consequence = 'captured'
-        if len(stack) > self._MAX_STACK:
-            # if bottom piece belongs to player making move, send to reserve
-            # else, bottom piece belongs to opponent. Make capture
+        excess_stack_height = len(stack) - self._MAX_STACK_HEIGHT
+
+        if excess_stack_height > 0:  # game rules define consequences based on excess stack height
+            # if bottom piece belongs to player making move, send to reserve. Else, make capture of opponent piece
+            consequence = 'captured'
             if bottom_color == active_player_color:
                 consequence = 'reserved'
 
+            # remove the excess pieces from the board
+            self.remove_pieces_from_bottom(position, number_to_remove=excess_stack_height)
+
+            # place the excess pieces into this player's reserve or capture pile, as appropriate
             self._players[self._whose_turn][consequence] += 1
-            self.remove_bottom_from(position)
 
     def is_in_board(self, position):
         """
@@ -251,16 +259,15 @@ class FocusGame:
             return self._ERROR_MESSAGES['invalid_number_of_pieces']
 
         # move is valid--process the move
-        # remove from bottom
-
-        # add atop
+        # remove slice from top of from_position
+        # add atop to_position
 
         # if this was the winning move, announce the winner
         if self._players[player_name]['captured'] >= self._WINNING_CAPTURE_COUNT:
             return self._whose_turn + ' Wins'
 
         # completed a successful normal move
-        return 'successfully moved'
+        return self._CONFIRMATION_MESSAGES['move_success']
 
 
 # test
