@@ -138,23 +138,35 @@ class FocusGame:
         """
         return self._players[player_name]['captured']
 
-    def remove_pieces_from_bottom(self, position, number_to_remove):
+    def remove_pieces_from_stack(self, position, top_or_bottom, number_to_remove):
         """
         removes bottom piece from a stack at given position
         :param position: tuple representing board coordinate in (row, column) format
+        :param top_or_bottom: 'top' or 'bottom'; determines whether pieces should be removed from top or bottom of stack
         :param number_to_remove: how many pieces to remove
+        :return: list of pieces removed
         """
         x, y = position
-        self._board[x][y] = self._board[x][y][number_to_remove:]  # remove from front (bottom)
+        stack_sans_bottom = self._board[x][y][number_to_remove:]
+        stack_sans_top = self._board[x][y][:-number_to_remove]
 
-    def place_atop_safely(self, position, color_abbreviation):
+        if top_or_bottom == 'bottom':
+            self._board[x][y] = stack_sans_bottom
+            removed_pieces = stack_sans_top
+        else:
+            self._board[x][y] = stack_sans_top
+            removed_pieces = stack_sans_bottom
+
+        return removed_pieces
+
+    def place_atop_safely(self, position, stack):
         """
         places a piece atop a stack at given position
         :param position: tuple representing board coordinate in (row, column) format
-        :param color_abbreviation: capital letter representing the color of piece to be placed
+        :param stack: list of pieces to be placed
         """
         x, y = position
-        self._board[x][y].append(color_abbreviation)
+        self._board[x][y].extend(stack)  # place stack atop the stack already at position
 
         # a piece has been placed! process the consequence based on game rules
         stack = self.show_pieces(position)
@@ -169,7 +181,7 @@ class FocusGame:
                 consequence = 'reserved'
 
             # remove the excess pieces from the board
-            self.remove_pieces_from_bottom(position, number_to_remove=excess_stack_height)
+            self.remove_pieces_from_stack(position, 'bottom', number_to_remove=excess_stack_height)
 
             # place the excess pieces into this player's reserve or capture pile, as appropriate
             self._players[self._whose_turn][consequence] += 1
@@ -209,7 +221,7 @@ class FocusGame:
 
         # move is valid--add player's piece to board
         active_player_piece = self._players[player_name]['color']
-        self.place_atop_safely(position, active_player_piece)
+        self.place_atop_safely(position, [active_player_piece])
 
         # update reserve count
         self._players[player_name]['reserve'] -= 1
@@ -224,8 +236,8 @@ class FocusGame:
         move_range = len(self.show_pieces(stack_position))
         from_x, from_y = stack_position
         to_x, to_y = to_position
-        distance_x = from_x - to_x  # guaranteed to both be non-negative
-        distance_y = from_y - to_y  # guaranteed to both be non-negative
+        distance_x = abs(from_x - to_x)  # board coordinates are all guaranteed to be non-negative
+        distance_y = abs(from_y - to_y)  # board coordinates are all guaranteed to be non-negative
         total_distance = distance_x + distance_y
 
         if total_distance > move_range:  # moving more spaces than allowed?
@@ -258,9 +270,9 @@ class FocusGame:
         if pieces_moved > len(self.show_pieces(from_position)):
             return self._ERROR_MESSAGES['invalid_number_of_pieces']
 
-        # move is valid--process the move
-        # remove slice from top of from_position
-        # add atop to_position
+        # move is valid--process the move by removing pieces from from_position and placing atop to_position
+        removed_pieces = self.remove_pieces_from_stack(from_position, 'top', pieces_moved)
+        self.place_atop_safely(to_position, removed_pieces)
 
         # if this was the winning move, announce the winner
         if self._players[player_name]['captured'] >= self._WINNING_CAPTURE_COUNT:
