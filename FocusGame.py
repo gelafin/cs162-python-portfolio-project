@@ -95,7 +95,7 @@ class FocusGame:
             player_2_info[0]: {'color': player_2_info[1].upper(), 'reserved': 0, 'captured': 0}
         }
 
-        self._player_turn = None
+        self._whose_turn = None
 
         # create 6x6 board with alternating pairs of red/green spots
         self._board = FocusBoard(board_length=6, pattern=2).get_board()
@@ -149,7 +149,7 @@ class FocusGame:
         # a piece has been placed! TODO: handle multiple pieces
         stack = self.show_pieces(position)
         bottom_color = stack[0]
-        active_player_color = self._players[self._player_turn]['color']
+        active_player_color = self._players[self._whose_turn]['color']
         consequence = 'captured'
         if len(stack) > self._MAX_STACK:
             # if bottom piece belongs to player making move, send to reserve
@@ -157,7 +157,7 @@ class FocusGame:
             if bottom_color == active_player_color:
                 consequence = 'reserved'
 
-            self._players[self._player_turn][consequence] += 1
+            self._players[self._whose_turn][consequence] += 1
             self.remove_bottom_from(position)
 
     def is_in_board(self, position):
@@ -186,7 +186,7 @@ class FocusGame:
         :return:
         """
         # enforce player turns like this, or call from move_piece()?
-        if player_name != self._player_turn:
+        if player_name != self._whose_turn:
             return 'not your turn'
 
         # If there are no pieces in reserve, return 'no pieces in reserve'
@@ -202,23 +202,23 @@ class FocusGame:
 
     def move_piece(self, player_name, from_position, to_position, pieces_moved):
 
-        if self._player_turn is None:
-            self._player_turn = player_name
+        if self._whose_turn is None:
+            self._whose_turn = player_name
 
         # enforce valid turn
-        if self._player_turn != player_name:
+        if self._whose_turn != player_name:
             return 'not your turn'
 
         # enforce valid from_position; player controls top of stack at from_position
         if self.show_pieces(from_position)[-1] != self._players[player_name]['color']:
             return 'invalid location'
 
-        # enforce valid to_position
+        # enforce valid to_position; to_position is within bounds
         if not self.is_in_board(to_position):
             return 'invalid location'
 
         # enforce valid number of pieces moved
-        if pieces_moved != len(self.show_pieces(from_position)):
+        if pieces_moved > len(self.show_pieces(from_position)):
             return 'invalid number of pieces'
 
         # move is valid--process the move
@@ -226,9 +226,9 @@ class FocusGame:
 
         # add atop
 
-        # check if this was the winning move, and congratulate the winner if so
+        # if this was the winning move, announce the winner
         if self._players[player_name]['captured'] >= self._WINNING_CAPTURE_COUNT:
-            return 'Wins'
+            return self._whose_turn + ' Wins'
 
         # completed a successful normal move
         return 'successfully moved'
