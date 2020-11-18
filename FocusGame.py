@@ -17,7 +17,7 @@ class FocusBoard:
 
         # construct the number of columns called for by board_length
         starting_color = 'R'
-        for column_index in range(board_length):
+        for row_index in range(board_length):
             # optimize loop if the given pattern evenly divides rows
             pattern_range = int(board_length / pattern) if board_length % pattern == 0 else board_length
             using_efficient_method = pattern_range != board_length
@@ -44,7 +44,7 @@ class FocusBoard:
         """
         row = []
         alternate = starting_color
-        for row_index in range(pattern_range):
+        for pattern_index in range(pattern_range):
             if alternate == 'R':
                 row.extend([['R'] for r in range(pattern)])  # append R's called for by pattern
                 alternate = 'G'
@@ -65,7 +65,7 @@ class FocusBoard:
         row = []
         count = 0
         alternate = starting_color
-        for row_index in range(board_length):
+        for column_index in range(board_length):
             row.append([alternate])
 
             # hey, we just added a piece. Maintain counter
