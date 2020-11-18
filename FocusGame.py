@@ -11,7 +11,7 @@ class FocusBoard:
         """
         creates game board
         :param board_length: width and height of board
-        :param pattern: for initial pattern; number of same color to place (left-to-right) before switching colors
+        :param pattern: for initial pattern; number of a color to place (left-to-right) before switching colors
         """
         self._board = []
 
@@ -40,7 +40,7 @@ class FocusBoard:
         :param pattern_range: used to reduce iterations; int(board_length / pattern)
         :param pattern: for initial pattern; number of same color to place (left-to-right) before switching colors
         :param starting_color: either 'R' or 'G'; which color to place first, at the left of the row
-        :return row: the generated row
+        :return: the generated row
         """
         row = []
         alternate = starting_color
@@ -57,10 +57,10 @@ class FocusBoard:
     def make_row_basic(self, pattern_range, pattern, starting_color):
         """
         generates a row based on desired pattern
-        :param pattern_range:
-        :param pattern:
+        :param pattern_range: int(board_length / pattern)
+        :param pattern: for initial pattern; number of same color to place (left-to-right) before switching colors
         :param starting_color: either 'R' or 'G'; which color to place first, at the left of the row
-        :return row: the generated row
+        :return: the generated row
         """
         row = []
         count = 0
@@ -124,7 +124,8 @@ class FocusGame:
 
     def show_pieces(self, position):
         """
-        :param position: tuple representing board coordinate in (row, column) format
+        returns a list of pieces at a given position
+        :param position: tuple representing board coordinate, in (row, column) format
         :return: list of pieces at the given position, with index 0 as bottom
         """
         x, y = position
@@ -134,7 +135,7 @@ class FocusGame:
         """
         shows the count of pieces that are in reserve for the given player
         :param player_name: name of player to check, as given to constructor (spelling not enforced here)
-        :return: count of pieces in reserve for the player
+        :return: number of pieces in reserve for the player
         """
         return self._players[player_name]['reserved']
 
@@ -142,14 +143,14 @@ class FocusGame:
         """
         shows the count of pieces that have been captured by the given player
         :param player_name: name of player to check, as given to constructor (spelling not enforced here)
-        :return: count of pieces captured by the player
+        :return: number of pieces captured by the player
         """
         return self._players[player_name]['captured']
 
     def remove_pieces_from_stack(self, position, top_or_bottom, number_to_remove):
         """
         removes bottom piece from a stack at given position
-        :param position: tuple representing board coordinate in (row, column) format
+        :param position: tuple representing board coordinate, in (row, column) format
         :param top_or_bottom: 'top' or 'bottom'; determines whether pieces should be removed from top or bottom of stack
         :param number_to_remove: how many pieces to remove
         :return: list of pieces removed
@@ -171,7 +172,7 @@ class FocusGame:
     def place_atop_safely(self, position, stack):
         """
         places a piece atop a stack at given position
-        :param position: tuple representing board coordinate in (row, column) format
+        :param position: tuple representing board coordinate, in (row, column) format
         :param stack: list of pieces to be placed
         """
         x, y = position
@@ -198,7 +199,7 @@ class FocusGame:
     def is_in_board(self, position):
         """
         checks whether a position is a playable point on the board
-        :param position:
+        :param position: tuple representing board coordinate, in (row, column) format
         :return: True if position is playable; False otherwise
         """
         x, y = position
@@ -217,8 +218,8 @@ class FocusGame:
         """
         makes a move using given player's reserve
         :param player_name: name of player to check, as given to constructor (spelling not enforced here)
-        :param position: tuple representing board coordinate in (row, column) format
-        :return:
+        :param position: tuple representing board coordinate, in (row, column) format
+        :return: TODO(?) confirmation message if move was processed; error message otherwise
         """
         # enforce player turns like this, or call from move_piece()?
         if player_name != self._whose_turn:
@@ -241,11 +242,10 @@ class FocusGame:
     def position_is_in_stack_range(self, stack_position, to_position):
         """
         determines whether a given position is within legal move range of a stack at a given position
-        :param stack_position:
-        :param to_position:
+        :param stack_position: tuple representing board coordinate of stack position, in (row, column) format
+        :param to_position: tuple representing board coordinate of destination position, in (row, column) format
         :return: True if to_position is within legal move range of the stack; False otherwise
         """
-        # TODO: enforce valid things?
         move_range = len(self.show_pieces(stack_position))
         from_x, from_y = stack_position
         to_x, to_y = to_position
@@ -263,9 +263,9 @@ class FocusGame:
         """
         moves pieces_moved pieces from from_position to to_position; player_name needed for validation
         :param player_name: name of player to check, as given to constructor (spelling not enforced here)
-        :param from_position:
-        :param to_position:
-        :param pieces_moved:
+        :param from_position: tuple representing board coordinate of stack to move, in (row, column) format
+        :param to_position: tuple representing board coordinate of destination position, in (row, column) format
+        :param pieces_moved: number of pieces to move (equal to number of spaces to move)
         :return: confirmation message if move was processed; error message otherwise
         """
         if self._whose_turn is None:
