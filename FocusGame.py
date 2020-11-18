@@ -54,10 +54,10 @@ class FocusBoard:
 
         return row
 
-    def make_row_basic(self, pattern_range, pattern, starting_color):
+    def make_row_basic(self, board_length, pattern, starting_color):
         """
         generates a row based on desired pattern
-        :param pattern_range: int(board_length / pattern)
+        :param board_length: number of columns in the board
         :param pattern: for initial pattern; number of same color to place (left-to-right) before switching colors
         :param starting_color: either 'R' or 'G'; which color to place first, at the left of the row
         :return: the generated row
@@ -65,7 +65,7 @@ class FocusBoard:
         row = []
         count = 0
         alternate = starting_color
-        for row_index in range(pattern_range):
+        for row_index in range(board_length):
             row.append([alternate])
 
             # hey, we just added a piece. Maintain counter
