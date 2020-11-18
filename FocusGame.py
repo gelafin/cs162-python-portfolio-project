@@ -114,6 +114,14 @@ class FocusGame:
             'move_success': 'successfully moved'
         }
 
+    def change_player_turn(self):
+        """
+        changes whose turn it is
+        """
+        player_1_name, player_2_name = self._players.keys()  # good place to put a generator if allowing #moreplayers
+
+        self._whose_turn = player_1_name if self._whose_turn != player_1_name else player_2_name
+
     def show_pieces(self, position):
         """
         :param position: tuple representing board coordinate in (row, column) format
@@ -125,7 +133,7 @@ class FocusGame:
     def show_reserve(self, player_name):
         """
         shows the count of pieces that are in reserve for the given player
-        :param player_name: name of player to check, as given to constructor
+        :param player_name: name of player to check, as given to constructor (spelling not enforced here)
         :return: count of pieces in reserve for the player
         """
         return self._players[player_name]['reserved']
@@ -133,7 +141,7 @@ class FocusGame:
     def show_captured(self, player_name):
         """
         shows the count of pieces that have been captured by the given player
-        :param player_name: name of player to check, as given to constructor
+        :param player_name: name of player to check, as given to constructor (spelling not enforced here)
         :return: count of pieces captured by the player
         """
         return self._players[player_name]['captured']
@@ -147,15 +155,16 @@ class FocusGame:
         :return: list of pieces removed
         """
         x, y = position
-        stack_sans_bottom = self._board[x][y][number_to_remove:]
-        stack_sans_top = self._board[x][y][:-number_to_remove]
+        full_stack = self._board[x][y]  # lol
+        stack_top_no_bottom = self._board[x][y][number_to_remove:]
+        stack_bottom_no_top = self._board[x][y][:-number_to_remove]
 
-        if top_or_bottom == 'bottom':
-            self._board[x][y] = stack_sans_bottom
-            removed_pieces = stack_sans_top
+        if top_or_bottom == 'top':
+            self._board[x][y] = stack_bottom_no_top
+            removed_pieces = stack_top_no_bottom if len(full_stack) != 1 else full_stack  # no bottom means no singleton
         else:
-            self._board[x][y] = stack_sans_top
-            removed_pieces = stack_sans_bottom
+            self._board[x][y] = stack_top_no_bottom
+            removed_pieces = stack_bottom_no_top if len(full_stack) != 1 else full_stack  # no top means no singleton
 
         return removed_pieces
 
@@ -172,7 +181,7 @@ class FocusGame:
         stack = self.show_pieces(position)
         bottom_color = stack[0]
         active_player_color = self._players[self._whose_turn]['color']
-        excess_stack_height = len(stack) - self._MAX_STACK_HEIGHT
+        excess_stack_height = len(stack) - self._MAX_STACK_HEIGHT  # has negative "excess" for small stacks
 
         if excess_stack_height > 0:  # game rules define consequences based on excess stack height
             # if bottom piece belongs to player making move, send to reserve. Else, make capture of opponent piece
@@ -207,7 +216,7 @@ class FocusGame:
     def reserved_move(self, player_name, position):
         """
         makes a move using given player's reserve
-        :param player_name: name of player to check, as given to constructor
+        :param player_name: name of player to check, as given to constructor (spelling not enforced here)
         :param position: tuple representing board coordinate in (row, column) format
         :return:
         """
@@ -226,6 +235,9 @@ class FocusGame:
         # update reserve count
         self._players[player_name]['reserve'] -= 1
 
+        # change whose turn it is
+        self.change_player_turn()
+
     def position_is_in_stack_range(self, stack_position, to_position):
         """
         determines whether a given position is within legal move range of a stack at a given position
@@ -233,6 +245,7 @@ class FocusGame:
         :param to_position:
         :return: True if to_position is within legal move range of the stack; False otherwise
         """
+        # TODO: enforce valid things?
         move_range = len(self.show_pieces(stack_position))
         from_x, from_y = stack_position
         to_x, to_y = to_position
@@ -247,12 +260,24 @@ class FocusGame:
         return True
 
     def move_piece(self, player_name, from_position, to_position, pieces_moved):
+        """
+        moves pieces_moved pieces from from_position to to_position; player_name needed for validation
+        :param player_name: name of player to check, as given to constructor (spelling not enforced here)
+        :param from_position:
+        :param to_position:
+        :param pieces_moved:
+        :return: confirmation message if move was processed; error message otherwise
+        """
         if self._whose_turn is None:
             self._whose_turn = player_name
 
         # enforce valid turn
         if self._whose_turn != player_name:
             return self._ERROR_MESSAGES['invalid_player_turn']
+
+        # enforce valid from_position; from_position is not empty
+        if len(self.show_pieces(from_position)) < 1:
+            return self._ERROR_MESSAGES['invalid_location']
 
         # enforce valid from_position; player controls top of stack at from_position
         if self.show_pieces(from_position)[-1] != self._players[player_name]['color']:
@@ -274,6 +299,9 @@ class FocusGame:
         removed_pieces = self.remove_pieces_from_stack(from_position, 'top', pieces_moved)
         self.place_atop_safely(to_position, removed_pieces)
 
+        # change whose turn it is
+        self.change_player_turn()
+
         # if this was the winning move, announce the winner
         if self._players[player_name]['captured'] >= self._WINNING_CAPTURE_COUNT:
             return self._whose_turn + ' Wins'
@@ -286,11 +314,33 @@ class FocusGame:
 p1 = ('george', 'G')
 p2 = ('ralph', 'R')
 game = FocusGame(p1, p2)
-stack_at_origin = game.show_pieces((0, 0))
-stack_here = game.show_pieces((5, 5))
-p1_reserve = game.show_reserve('george')
-p2_reserve = game.show_reserve('ralph')
-p1_captured = game.show_captured('george')
-p2_captured = game.show_captured('ralph')
-game.move_piece('george')
+
+# test initial stuff
+stack_at_origin = game.show_pieces((0, 0))  # ['R']
+stack_here = game.show_pieces((5, 5))  # ['G']
+p1_reserve = game.show_reserve('george')  # 0
+p2_reserve = game.show_reserve('ralph')  # 0
+p1_captured = game.show_captured('george')  # 0
+p2_captured = game.show_captured('ralph')  # 0
+
+message_not_piece = game.move_piece('ralph', (0, 2), (0, 1), 1)  # move not your piece
+
+message_yes = game.move_piece('ralph', (0, 0), (0, 1), 1)  # 0,0 has nothing and 0,1 has [R, R]
+
+message_not_turn = game.move_piece('ralph', (0, 1), (0, 2), 1)  # move not your turn
+
+game.move_piece('george', (2, 0), (0, 1), 1)  # 2,0 has nothing and 0,1 has [R, R, G]
+
+message_invalid_location = game.move_piece('ralph', (0, 0), (0, 1), 1)  # move empty piece?
+
+message_not_piece_2 = game.move_piece('ralph', (0, 1), (0, 2), 1)  # move opponent piece?
+
+message_invalid_location_2 = game.move_piece('george', (0, 1), (0, 1), 1)  # move stack to same location?
+
+message_invalid_location_3 = game.move_piece('george', (0, 1), (0, 1), 0)  # move stack to same location, using turn?
+
+game.move_piece('ralph', (2, 1), (2, 0), 1)  # 2,1 has nothing and 2,0 has [R]
+
+
+
 print(0)
