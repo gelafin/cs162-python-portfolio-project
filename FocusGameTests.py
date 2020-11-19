@@ -42,7 +42,7 @@ class MyTestCase(unittest.TestCase):
 
     def test_attempt_moving_opponent_piece_during_first_turn_default_settings(self):
         game = initialize_basic_game()
-        message_not_piece = game.move_piece('ralph', (0, 2), (0, 1), 1)
+        message_not_piece = game.move_piece('ralph', (2, 0), (1, 0), 1)
 
         self.assertEqual(message_not_piece, MESSAGES['invalid_location'])
 
@@ -68,8 +68,8 @@ class MyTestCase(unittest.TestCase):
 
     def test_attempt_moving_empty_space_default_settings(self):
         game = initialize_basic_game()
-        game.move_piece('ralph', (0, 0), (0, 1), 1)  # 0,0 has nothing and 0,1 has [R, R]
-        game.move_piece('george', (2, 0), (0, 1), 1)  # 2,0 has nothing and 0,1 has [R, R, G]
+        game.move_piece('ralph', (0, 0), (1, 0), 1)  # 0,0 has nothing and 0,1 has [R, R]
+        game.move_piece('george', (2, 0), (1, 0), 1)  # 2,0 has nothing and 0,1 has [R, R, G]
         message_invalid_location = game.move_piece('ralph', (0, 0), (0, 1), 1)  # used to be ralph's piece; now empty
 
         self.assertEqual(message_invalid_location, MESSAGES['invalid_location'])
