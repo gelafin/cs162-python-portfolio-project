@@ -219,7 +219,7 @@ class FocusGame:
         makes a move using given player's reserve
         :param player_name: name of player to check, as given to constructor (spelling not enforced here)
         :param position: tuple representing board coordinate, in (row, column) format
-        :return: TODO(?) confirmation message if move was processed; error message otherwise
+        :return: confirmation message if move was processed; error message otherwise
         """
         # enforce player turns like this, or call from move_piece()?
         if player_name != self._whose_turn:
@@ -228,6 +228,10 @@ class FocusGame:
         # If there are no pieces in reserve, return 'no pieces in reserve'
         if self._players[player_name]['reserve'] == 0:
             return 'no pieces in reserve'
+
+        # enforce valid position; position is within bounds
+        if not self.is_in_board(position):
+            return self._ERROR_MESSAGES['invalid_location']
 
         # move is valid--add player's piece to board
         active_player_piece = self._players[player_name]['color']
@@ -238,6 +242,13 @@ class FocusGame:
 
         # change whose turn it is
         self.change_player_turn()
+
+        # if this was the winning move, announce the winner
+        if self._players[player_name]['captured'] >= self._WINNING_CAPTURE_COUNT:
+            return self._whose_turn + ' Wins'
+
+        # completed a successful normal move
+        return self._CONFIRMATION_MESSAGES['move_success']
 
     def position_is_in_stack_range(self, stack_position, to_position):
         """
