@@ -2,6 +2,18 @@
 # Date: 11/11/2020
 # Description: game
 
+
+def cartesian_to_list(cartesian_coordinate):
+    """
+    translates cartesian coordinates (x, y) into Python 2D list subscript indices (y, x)
+    :param cartesian_coordinate: tuple of two integers representing a Cartesian-style point
+    :return: tuple of two integers in the opposite order, which can be used to subscript into a Python list
+    """
+    x, y = cartesian_coordinate
+
+    return y, x
+
+
 class FocusBoard:
     """
     Represents the board of a game of Focus/Domination
@@ -128,7 +140,7 @@ class FocusGame:
         :param position: tuple representing board coordinate, in (row, column) format
         :return: list of pieces at the given position, with index 0 as bottom
         """
-        x, y = position
+        x, y = cartesian_to_list(position)
         return self._board[x][y]
 
     def show_reserve(self, player_name):
@@ -155,7 +167,7 @@ class FocusGame:
         :param number_to_remove: how many pieces to remove
         :return: list of pieces removed
         """
-        x, y = position
+        x, y = cartesian_to_list(position)
         full_stack = self._board[x][y]  # lol
         stack_top_no_bottom = self._board[x][y][number_to_remove:]
         stack_bottom_no_top = self._board[x][y][:-number_to_remove]
@@ -175,7 +187,7 @@ class FocusGame:
         :param position: tuple representing board coordinate, in (row, column) format
         :param stack: list of pieces to be placed
         """
-        x, y = position
+        x, y = cartesian_to_list(position)
         self._board[x][y].extend(stack)  # place stack atop the stack already at position
 
         # a piece has been placed! process the consequence based on game rules
@@ -202,7 +214,7 @@ class FocusGame:
         :param position: tuple representing board coordinate, in (row, column) format
         :return: True if position is playable; False otherwise
         """
-        x, y = position
+        x, y = cartesian_to_list(position)
 
         # check if y is out of column range
         if y < 0 or y > len(self._board) - 1:  # comparing to 0-based index
@@ -326,23 +338,10 @@ p1 = ('george', 'G')
 p2 = ('ralph', 'R')
 game = FocusGame(p1, p2)
 
-# test initial stuff
-stack_at_origin = game.show_pieces((0, 0))  # ['R']
-stack_here = game.show_pieces((5, 5))  # ['G']
-p1_reserve = game.show_reserve('george')  # 0
-p2_reserve = game.show_reserve('ralph')  # 0
-p1_captured = game.show_captured('george')  # 0
-p2_captured = game.show_captured('ralph')  # 0
+game.move_piece('ralph', (0, 0), (1, 0), 1)  # 0,0 has nothing and 0,1 has [R, R]
+game.move_piece('george', (2, 0), (1, 0), 1)  # 2,0 has nothing and 0,1 has [R, R, G]
+message_invalid_location = game.move_piece('ralph', (0, 0), (0, 1), 1)  # used to be ralph's piece; now empty
 
-message_not_piece = game.move_piece('ralph', (0, 2), (0, 1), 1)  # move not your piece
-
-message_yes = game.move_piece('ralph', (0, 0), (0, 1), 1)  # 0,0 has nothing and 0,1 has [R, R]
-
-message_not_turn = game.move_piece('ralph', (0, 1), (0, 2), 1)  # move not your turn
-
-game.move_piece('george', (2, 0), (0, 1), 1)  # 2,0 has nothing and 0,1 has [R, R, G]
-
-message_invalid_location = game.move_piece('ralph', (0, 0), (0, 1), 1)  # move empty piece?
 
 message_not_piece_2 = game.move_piece('ralph', (0, 1), (0, 2), 1)  # move opponent piece?
 
