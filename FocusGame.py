@@ -226,7 +226,7 @@ class FocusGame:
             return 'not your turn'
 
         # If there are no pieces in reserve, return 'no pieces in reserve'
-        if self._players[player_name]['reserve'] == 0:
+        if self._players[player_name]['reserve'] <= 0:
             return 'no pieces in reserve'
 
         # enforce valid position; position is within bounds
@@ -353,5 +353,3 @@ message_invalid_location_3 = game.move_piece('george', (0, 1), (0, 1), 0)  # mov
 game.move_piece('ralph', (2, 1), (2, 0), 1)  # 2,1 has nothing and 2,0 has [R]
 
 
-
-print(0)
