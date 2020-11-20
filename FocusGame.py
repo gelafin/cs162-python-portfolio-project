@@ -245,6 +245,24 @@ class FocusGame:
 
         return self._CONFIRMATION_MESSAGES['move_success']
 
+    def general_move_validation(self, player_name, to_position):
+        """
+        validates things that must be validated before any type of move should be allowed
+        :param player_name: name of player to check, as given to constructor (spelling not enforced here)
+        :param to_position: tuple representing board coordinate, in (row, column) format
+        :return: True if all checks passed; error message otherwise
+        """
+        # enforce that it is the player's turn
+        if player_name != self._whose_turn:
+            return 'not your turn'
+
+        # enforce valid position; position is within bounds
+        if not self.is_in_board(to_position):
+            return self._ERROR_MESSAGES['invalid_location']
+
+        # all checks passed
+        return True
+
     def reserved_move(self, player_name, position):
         """
         makes a move using given player's reserve
@@ -252,17 +270,14 @@ class FocusGame:
         :param position: tuple representing board coordinate, in (row, column) format
         :return: confirmation message if move was processed; error message otherwise
         """
-        # enforce player turns like this, or call from move_piece()?
-        if player_name != self._whose_turn:
-            return 'not your turn'
+        # general validation
+        validation_result = self.general_move_validation(player_name, position)
+        if validation_result is not True:  # validation_result is string if any test failed
+            return validation_result
 
         # If there are no pieces in reserve, return 'no pieces in reserve'
         if self._players[player_name]['reserved'] <= 0:
             return 'no pieces in reserve'
-
-        # enforce valid position; position is within bounds
-        if not self.is_in_board(position):
-            return self._ERROR_MESSAGES['invalid_location']
 
         # move is valid--add player's piece to board
         active_player_piece = self._players[player_name]['color']
@@ -305,9 +320,10 @@ class FocusGame:
         if self._whose_turn is None:
             self._whose_turn = player_name
 
-        # enforce valid turn
-        if self._whose_turn != player_name:
-            return self._ERROR_MESSAGES['invalid_player_turn']
+        # general validation
+        validation_result = self.general_move_validation(player_name, to_position)
+        if validation_result is not True:  # validation_result is string if any test failed
+            return validation_result
 
         # enforce valid from_position; from_position is not empty
         if len(self.show_pieces(from_position)) < 1:
@@ -315,10 +331,6 @@ class FocusGame:
 
         # enforce valid from_position; player controls top of stack at from_position
         if self.show_pieces(from_position)[-1] != self._players[player_name]['color']:
-            return self._ERROR_MESSAGES['invalid_location']
-
-        # enforce valid to_position; to_position is within bounds
-        if not self.is_in_board(to_position):
             return self._ERROR_MESSAGES['invalid_location']
 
         # enforce valid to_position; to_position is within legal range
