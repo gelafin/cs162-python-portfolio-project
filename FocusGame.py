@@ -1,6 +1,6 @@
 # Author: Mark Mendez
-# Date: 11/11/2020
-# Description: game
+# Date: 11/20/2020
+# Description: Defines classes used to facilitate a game of Focus/Domination
 
 
 def cartesian_to_list(cartesian_coordinate):
@@ -334,12 +334,4 @@ class FocusGame:
         self.place_atop_safely(to_position, removed_pieces)
 
         return self.process_post_move()
-
-
-# test
-p1 = ('george', 'G')
-p2 = ('ralph', 'R')
-game = FocusGame(p1, p2)
-
-
 
