@@ -195,21 +195,23 @@ class FocusGame:
 
         # a piece has been placed! process the consequence based on game rules
         stack = self.show_pieces(position)
-        bottom_color = stack[0]
         active_player_color = self._players[self._whose_turn]['color']
         excess_stack_height = len(stack) - self._MAX_STACK_HEIGHT  # has negative "excess" for small stacks
 
         if excess_stack_height > 0:  # game rules define consequences based on excess stack height
-            # if bottom piece belongs to player making move, send to reserve. Else, make capture of opponent piece
-            consequence = 'captured'
-            if bottom_color == active_player_color:
-                consequence = 'reserved'
+            # remove the bottom pieces from the excessive stack so it's not excessive anymore
+            removed_pieces = self.remove_pieces_from_stack(position, 'bottom', number_to_remove=excess_stack_height)
 
-            # remove the excess pieces from the board
-            self.remove_pieces_from_stack(position, 'bottom', number_to_remove=excess_stack_height)
+            # process each excess piece's capture or reserve placement
+            for removed_piece in removed_pieces:
 
-            # place the excess pieces into this player's reserve or capture pile, as appropriate
-            self._players[self._whose_turn][consequence] += 1
+                # if bottom piece belongs to player making move, send to reserve. Else, make capture of opponent piece
+                consequence = 'captured'
+                if removed_piece == active_player_color:
+                    consequence = 'reserved'
+
+                # place the excess pieces into this player's reserve or capture pile, as appropriate
+                self._players[self._whose_turn][consequence] += 1
 
     def is_in_board(self, position):
         """
@@ -341,6 +343,13 @@ p1 = ('george', 'G')
 p2 = ('ralph', 'R')
 game = FocusGame(p1, p2)
 
+game.move_piece('ralph', (0, 0), (1, 0), 1)  # 0,0 has nothing and 1, 0 has [R, R]
+game.move_piece('george', (2, 0), (1, 0), 1)  # 2,0 has nothing and 1,0 has [R, R, G]
+game.move_piece('ralph', (5, 0), (4, 0), 1)  # 5,0 has nothing and 4,0 has [R, R]
+game.move_piece('george', (1, 0), (4, 0), 3)  # 1,0 has nothing and 4,0 has [R, R, R, R, G]
+game.move_piece('ralph', (3, 5), (4, 5), 1)  # 3,5 has nothing and 4,5 has [G, R]
+message_success = game.move_piece('george', (4, 0), (4, 5), 5)  # 4,1 has nothing and 4,0 has [G, R, R, R, R, R, G]
 
+# green on bottom means reserve and capture [G, R]
 
 

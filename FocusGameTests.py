@@ -123,6 +123,43 @@ class MyTestCase(unittest.TestCase):
         self.assertListEqual(game.show_pieces((1, 0)), ['R'])
         self.assertListEqual(game.show_pieces((2, 1)), ['R', 'R', 'G'])
 
+    def test_add_1_to_capture_success_default_settings(self):
+        """ the game kind of stack, the good kind of overflow """
+        game = initialize_basic_game()
+        game.move_piece('ralph', (0, 0), (1, 0), 1)  # 0,0 has nothing and 1, 0 has [R, R]
+        game.move_piece('george', (2, 0), (1, 0), 1)  # 2,0 has nothing and 1,0 has [R, R, G]
+        game.move_piece('ralph', (5, 0), (4, 0), 1)  # 5,0 has nothing and 4,0 has [R, R]
+        game.move_piece('george', (1, 0), (4, 0), 3)  # 1,0 has nothing and 4,0 has [R, R, R, R, G]
+        game.move_piece('ralph', (3, 5), (4, 5), 1)  # 3,5 has nothing and 4,5 has [G, R]
+        message_success = game.move_piece('george', (4, 1), (4, 0), 1)  # 4,1 has nothing and 4,0 has [R, R, R, R, G, G]
+
+        # red on bottom means capture [R]
+
+        self.assertEqual(message_success, MESSAGES['move_success'])
+        self.assertListEqual(game.show_pieces((4, 0)), ['R', 'R', 'R', 'G', 'G'])
+        self.assertEqual(game.show_captured('george'), 1)
+
+    def test_add_2_split_into_reserve_and_capture_success_default_settings(self):
+        """ the game kind of stack, the good kind of overflow """
+        game = initialize_basic_game()
+        game.move_piece('ralph', (0, 0), (1, 0), 1)  # 0,0 has nothing and 1, 0 has [R, R]
+        game.move_piece('george', (2, 0), (1, 0), 1)  # 2,0 has nothing and 1,0 has [R, R, G]
+        game.move_piece('ralph', (5, 0), (4, 0), 1)  # 5,0 has nothing and 4,0 has [R, R]
+        game.move_piece('george', (1, 0), (4, 0), 3)  # 1,0 has nothing and 4,0 has [R, R, R, R, G]
+        game.move_piece('ralph', (3, 5), (4, 5), 1)  # 3,5 has nothing and 4,5 has [G, R]
+        message_success = game.move_piece('george', (4, 0), (4, 5), 5)  # 4,1 has nothing and 4,0 has [G, R, R, R, R, R, G]
+
+        # green on bottom means reserve and capture [G, R]
+
+        self.assertEqual(message_success, MESSAGES['move_success'])
+        self.assertListEqual(game.show_pieces((4, 0)), [])
+        self.assertListEqual(game.show_pieces((4, 5)), ['R', 'R', 'R', 'R', 'G'])
+        self.assertEqual(game.show_reserve('george'), 1)
+        self.assertEqual(game.show_captured('george'), 1)
+
+
+    # add 2 to capture/reserve
+
 
 if __name__ == '__main__':
     unittest.main()
