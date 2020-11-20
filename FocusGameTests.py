@@ -234,6 +234,28 @@ class MyTestCase(unittest.TestCase):
         self.assertListEqual(game.show_pieces((5, 4)), ['R', 'R', 'R', 'R', 'G'])
         self.assertEqual(game.show_captured('george'), 7)
 
+    def test_reserved_move_victory_default_settings(self):
+        game = initialize_basic_game()
+        game._players['george']['captured'] = 5  # 1 more piece needed for victory
+        game.move_piece('ralph', (0, 0), (1, 0), 1)  # 0,0 has nothing and 1, 0 has [R, R]
+        game.move_piece('george', (2, 0), (1, 0), 1)  # 2,0 has nothing and 1,0 has [R, R, G]
+        game.move_piece('ralph', (5, 0), (4, 0), 1)  # 5,0 has nothing and 4,0 has [R, R]
+        game.move_piece('george', (1, 0), (4, 0), 3)  # 1,0 has nothing and 4,0 has [R, R, R, R, G]
+        game.move_piece('ralph', (4, 4), (5, 4), 1)  # 4,4 has nothing and 5,4 has [R, R]
+        game.move_piece('george', (5, 5), (4, 5), 1)  # 5,5 has nothing and 4,5 has [G, G]
+        game.move_piece('ralph', (0, 2), (0, 3), 1)  # 0,2 has nothing and 0,3 has [G, R]
+        game.move_piece('george', (4, 0), (4, 5), 5)  # 4,0 has nothing and 4,5 has [G, G, R, R, R, R, G]
+
+        # green on bottom means reserve [G, G]; 4,5 has [R, R, R, R, G]
+
+        game.move_piece('ralph', (5, 4), (4, 5), 1)  # ralph pathetically adds 1 to reserve; 4,5 has [R, R, R, G, R]
+        message_win = game.reserved_move('george', (4, 5))  # amazing george captures an R; 4,5 has [R, R, G, R, G]
+
+        # red on bottom means capture [R]
+
+        self.assertEqual(message_win, 'george Wins')
+        self.assertListEqual(game.show_pieces((4, 5)), ['R', 'R', 'G', 'R', 'G'])
+
 
 if __name__ == '__main__':
     unittest.main()
