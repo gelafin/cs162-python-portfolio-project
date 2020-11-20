@@ -231,6 +231,20 @@ class FocusGame:
         # passed all checks
         return True
 
+    def process_post_move(self):
+        """
+        handles processes that need to happen after each move has been made
+        :return move success confirmation message
+        """
+        # if this was the winning move, announce the winner
+        if self._players[self._whose_turn]['captured'] >= self._WINNING_CAPTURE_COUNT:
+            return self._whose_turn + ' Wins'
+
+        # change whose turn it is
+        self.change_player_turn()
+
+        return self._CONFIRMATION_MESSAGES['move_success']
+
     def reserved_move(self, player_name, position):
         """
         makes a move using given player's reserve
@@ -243,7 +257,7 @@ class FocusGame:
             return 'not your turn'
 
         # If there are no pieces in reserve, return 'no pieces in reserve'
-        if self._players[player_name]['reserve'] <= 0:
+        if self._players[player_name]['reserved'] <= 0:
             return 'no pieces in reserve'
 
         # enforce valid position; position is within bounds
@@ -255,17 +269,9 @@ class FocusGame:
         self.place_atop_safely(position, [active_player_piece])
 
         # update reserve count
-        self._players[player_name]['reserve'] -= 1
+        self._players[player_name]['reserved'] -= 1
 
-        # change whose turn it is
-        self.change_player_turn()
-
-        # if this was the winning move, announce the winner
-        if self._players[player_name]['captured'] >= self._WINNING_CAPTURE_COUNT:
-            return self._whose_turn + ' Wins'
-
-        # completed a successful normal move
-        return self._CONFIRMATION_MESSAGES['move_success']
+        return self.process_post_move()
 
     def position_is_in_stack_range(self, stack_position, to_position):
         """
@@ -327,15 +333,7 @@ class FocusGame:
         removed_pieces = self.remove_pieces_from_stack(from_position, 'top', pieces_moved)
         self.place_atop_safely(to_position, removed_pieces)
 
-        # change whose turn it is
-        self.change_player_turn()
-
-        # if this was the winning move, announce the winner
-        if self._players[player_name]['captured'] >= self._WINNING_CAPTURE_COUNT:
-            return self._whose_turn + ' Wins'
-
-        # completed a successful normal move
-        return self._CONFIRMATION_MESSAGES['move_success']
+        return self.process_post_move()
 
 
 # test
@@ -343,13 +341,6 @@ p1 = ('george', 'G')
 p2 = ('ralph', 'R')
 game = FocusGame(p1, p2)
 
-game.move_piece('ralph', (0, 0), (1, 0), 1)  # 0,0 has nothing and 1, 0 has [R, R]
-game.move_piece('george', (2, 0), (1, 0), 1)  # 2,0 has nothing and 1,0 has [R, R, G]
-game.move_piece('ralph', (5, 0), (4, 0), 1)  # 5,0 has nothing and 4,0 has [R, R]
-game.move_piece('george', (1, 0), (4, 0), 3)  # 1,0 has nothing and 4,0 has [R, R, R, R, G]
-game.move_piece('ralph', (3, 5), (4, 5), 1)  # 3,5 has nothing and 4,5 has [G, R]
-message_success = game.move_piece('george', (4, 0), (4, 5), 5)  # 4,1 has nothing and 4,0 has [G, R, R, R, R, R, G]
 
-# green on bottom means reserve and capture [G, R]
 
 

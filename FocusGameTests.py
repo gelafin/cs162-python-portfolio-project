@@ -5,7 +5,7 @@ MESSAGES = {
     'invalid_location': 'invalid location',
     'invalid_number_of_pieces': 'invalid number of pieces',
     'not_your_turn': 'not your turn',
-    'move_success': 'successfully moved'
+    'move_success': 'successfully moved',
 }
 
 
@@ -147,7 +147,7 @@ class MyTestCase(unittest.TestCase):
         game.move_piece('ralph', (5, 0), (4, 0), 1)  # 5,0 has nothing and 4,0 has [R, R]
         game.move_piece('george', (1, 0), (4, 0), 3)  # 1,0 has nothing and 4,0 has [R, R, R, R, G]
         game.move_piece('ralph', (3, 5), (4, 5), 1)  # 3,5 has nothing and 4,5 has [G, R]
-        message_success = game.move_piece('george', (4, 0), (4, 5), 5)  # 4,1 has nothing and 4,0 has [G, R, R, R, R, R, G]
+        message_success = game.move_piece('george', (4, 0), (4, 5), 5)  # 4,0 has nothing and 4,5 has [G, R, R, R, R, R, G]
 
         # green on bottom means reserve and capture [G, R]
 
@@ -157,8 +157,82 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(game.show_reserve('george'), 1)
         self.assertEqual(game.show_captured('george'), 1)
 
+    def test_add_2_into_capture_success_default_settings(self):
+        game = initialize_basic_game()
+        game.move_piece('ralph', (0, 0), (1, 0), 1)  # 0,0 has nothing and 1, 0 has [R, R]
+        game.move_piece('george', (2, 0), (1, 0), 1)  # 2,0 has nothing and 1,0 has [R, R, G]
+        game.move_piece('ralph', (5, 0), (4, 0), 1)  # 5,0 has nothing and 4,0 has [R, R]
+        game.move_piece('george', (1, 0), (4, 0), 3)  # 1,0 has nothing and 4,0 has [R, R, R, R, G]
+        game.move_piece('ralph', (4, 4), (5, 4), 1)  # 4,4 has nothing and 5,4 has [R, R]
+        message_success = game.move_piece('george', (4, 0), (5, 4), 5)  # 4,1 has nothing and  has [R, R, R, R, R, R, G]
 
-    # add 2 to capture/reserve
+        # red on bottom means capture [R, R]
+
+        self.assertEqual(message_success, MESSAGES['move_success'])
+        self.assertListEqual(game.show_pieces((4, 0)), [])
+        self.assertListEqual(game.show_pieces((5, 4)), ['R', 'R', 'R', 'R', 'G'])
+        self.assertEqual(game.show_captured('george'), 2)
+
+    def test_add_2_into_reserve_success_default_settings(self):
+        game = initialize_basic_game()
+        game.move_piece('ralph', (0, 0), (1, 0), 1)  # 0,0 has nothing and 1, 0 has [R, R]
+        game.move_piece('george', (2, 0), (1, 0), 1)  # 2,0 has nothing and 1,0 has [R, R, G]
+        game.move_piece('ralph', (5, 0), (4, 0), 1)  # 5,0 has nothing and 4,0 has [R, R]
+        game.move_piece('george', (1, 0), (4, 0), 3)  # 1,0 has nothing and 4,0 has [R, R, R, R, G]
+        game.move_piece('ralph', (4, 4), (5, 4), 1)  # 4,4 has nothing and 5,4 has [R, R]
+        game.move_piece('george', (5, 5), (4, 5), 1)  # 5,5 has nothing and 4,5 has [G, G]
+        game.move_piece('ralph', (0, 2), (0, 3), 1)  # 0,2 has nothing and 0,3 has [G, R]
+        message_success = game.move_piece('george', (4, 0), (4, 5), 5)  # 4,0 has nothing and 4,5 has [G, G, R, R, R, R, G]
+
+        # green on bottom means reserve [G, G] (lol)
+
+        self.assertEqual(message_success, MESSAGES['move_success'])
+        self.assertListEqual(game.show_pieces((4, 0)), [])
+        self.assertListEqual(game.show_pieces((4, 5)), ['R', 'R', 'R', 'R', 'G'])
+        self.assertEqual(game.show_reserve('george'), 2)
+
+    def test_make_reserved_move_success_default_settings(self):
+        game = initialize_basic_game()
+        game.move_piece('ralph', (0, 0), (1, 0), 1)  # 0,0 has nothing and 1, 0 has [R, R]
+        game.move_piece('george', (2, 0), (1, 0), 1)  # 2,0 has nothing and 1,0 has [R, R, G]
+        game.move_piece('ralph', (5, 0), (4, 0), 1)  # 5,0 has nothing and 4,0 has [R, R]
+        game.move_piece('george', (1, 0), (4, 0), 3)  # 1,0 has nothing and 4,0 has [R, R, R, R, G]
+        game.move_piece('ralph', (4, 4), (5, 4), 1)  # 4,4 has nothing and 5,4 has [R, R]
+        game.move_piece('george', (5, 5), (4, 5), 1)  # 5,5 has nothing and 4,5 has [G, G]
+        game.move_piece('ralph', (0, 2), (0, 3), 1)  # 0,2 has nothing and 0,3 has [G, R]
+        message_success = game.move_piece('george', (4, 0), (4, 5), 5)  # 4,0 has nothing and 4,5 has [G, G, R, R, R, R, G]
+
+        # green on bottom means reserve [G, G] (lol)
+        self.assertEqual(message_success, MESSAGES['move_success'])
+        self.assertListEqual(game.show_pieces((4, 0)), [])
+        self.assertListEqual(game.show_pieces((4, 5)), ['R', 'R', 'R', 'R', 'G'])
+        self.assertEqual(game.show_reserve('george'), 2)
+
+        # make reserved move
+        game.move_piece('ralph', (0, 3), (0, 4), 1)  # 0,3 has [G] and 0,4 has [R, R]
+        game.reserved_move('george', (4, 5))  # 4,5 has [R, R, R, R, G, G] and reserve = 1 and captured = 1
+
+        self.assertEqual(game.show_reserve('george'), 1)
+        self.assertEqual(game.show_captured('george'), 1)
+        self.assertListEqual(game.show_pieces((4, 5)), ['R', 'R', 'R', 'G', 'G'])
+
+    def test_victory_default_settings(self):
+        game = initialize_basic_game()
+        game._players['george']['captured'] = 5  # 1 more piece needed for victory
+
+        game.move_piece('ralph', (0, 0), (1, 0), 1)  # 0,0 has nothing and 1, 0 has [R, R]
+        game.move_piece('george', (2, 0), (1, 0), 1)  # 2,0 has nothing and 1,0 has [R, R, G]
+        game.move_piece('ralph', (5, 0), (4, 0), 1)  # 5,0 has nothing and 4,0 has [R, R]
+        game.move_piece('george', (1, 0), (4, 0), 3)  # 1,0 has nothing and 4,0 has [R, R, R, R, G]
+        game.move_piece('ralph', (4, 4), (5, 4), 1)  # 4,4 has nothing and 5,4 has [R, R]
+        message_win = game.move_piece('george', (4, 0), (5, 4), 5)  # 4,1 has nothing and  has [R, R, R, R, R, R, G]
+
+        # red on bottom means capture [R, R]
+
+        self.assertEqual(message_win, 'george Wins')
+        self.assertListEqual(game.show_pieces((4, 0)), [])
+        self.assertListEqual(game.show_pieces((5, 4)), ['R', 'R', 'R', 'R', 'G'])
+        self.assertEqual(game.show_captured('george'), 7)
 
 
 if __name__ == '__main__':
