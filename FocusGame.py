@@ -169,7 +169,7 @@ class FocusGame:
         """
         x, y = cartesian_to_list(position)
         full_stack = self._board[x][y]  # lol
-        stack_top_no_bottom = self._board[x][y][number_to_remove:]
+        stack_top_no_bottom = self._board[x][y][number_to_remove - 1:]
         stack_bottom_no_top = self._board[x][y][:-number_to_remove]
 
         if top_or_bottom == 'top':
@@ -338,13 +338,9 @@ p1 = ('george', 'G')
 p2 = ('ralph', 'R')
 game = FocusGame(p1, p2)
 
-game.move_piece('ralph', (0, 0), (1, 0), 1)  # 0,0 has nothing and 0,1 has [R, R]
+game.move_piece('ralph', (0, 0), (1, 0), 1)  # 0,0 has nothing and 1, 0 has [R, R]
 game.move_piece('george', (2, 0), (1, 0), 1)  # 2,0 has nothing and 1,0 has [R, R, G]
-
-message_invalid_location_2 = game.move_piece('george', (0, 1), (0, 1), 1)  # move stack to same location?
-
-message_invalid_location_3 = game.move_piece('george', (0, 1), (0, 1), 0)  # move stack to same location, using turn?
-
-game.move_piece('ralph', (2, 1), (2, 0), 1)  # 2,1 has nothing and 2,0 has [R]
+game.move_piece('ralph', (5, 0), (4, 0), 1)  # ralph has no more stacks in range of 1,0
+message_success = game.move_piece('george', (1, 0), (3, 0), 2)  # 1,0 has [R] and 3,0 has [G, R, G]
 
 

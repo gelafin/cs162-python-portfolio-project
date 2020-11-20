@@ -53,12 +53,6 @@ class MyTestCase(unittest.TestCase):
 
         self.assertEqual(message_not_piece, MESSAGES['invalid_location'])
 
-    def test_move_piece_success_default_settings(self):
-        game = initialize_basic_game()
-        message_yes = game.move_piece('ralph', (0, 0), (0, 1), 1)  # 0,0 has nothing and 0,1 has [R, R]
-
-        self.assertEqual(message_yes, MESSAGES['move_success'])
-
     def test_attempt_moving_during_opponent_turn_default_settings(self):
         game = initialize_basic_game()
         game.move_piece('ralph', (0, 0), (0, 1), 1)  # 0,0 has nothing and 0,1 has [R, R]
@@ -79,6 +73,33 @@ class MyTestCase(unittest.TestCase):
         message_invalid_location = game.move_piece('ralph', (0, 0), (0, 0), 1)
 
         self.assertEqual(message_invalid_location, MESSAGES['invalid_location'])
+
+    def test_move_one_piece_horizontally_success_default_settings(self):
+        game = initialize_basic_game()
+        message_success = game.move_piece('ralph', (0, 0), (1, 0), 1)  # 0,0 has nothing and 1,0 has [R, R]
+
+        self.assertEqual(message_success, MESSAGES['move_success'])
+        self.assertListEqual(game.show_pieces((0, 0)), [])
+        self.assertListEqual(game.show_pieces((1, 0)), ['R', 'R'])
+
+    def test_move_one_piece_vertically_success_default_settings(self):
+        game = initialize_basic_game()
+        message_success = game.move_piece('ralph', (0, 0), (0, 1), 1)  # 0,0 has nothing and 0, 1 has [G, R]
+
+        self.assertEqual(message_success, MESSAGES['move_success'])
+        self.assertListEqual(game.show_pieces((0, 0)), [])
+        self.assertListEqual(game.show_pieces((0, 1)), ['G', 'R'])
+
+    def test_move_two_of_three_pieces_success_default_settings(self):
+        game = initialize_basic_game()
+        game.move_piece('ralph', (0, 0), (1, 0), 1)  # 0,0 has nothing and 1, 0 has [R, R]
+        game.move_piece('george', (2, 0), (1, 0), 1)  # 2,0 has nothing and 1,0 has [R, R, G]
+        game.move_piece('ralph', (5, 0), (4, 0), 1)  # ralph has no more stacks in range of 1,0
+        message_success = game.move_piece('george', (1, 0), (3, 0), 2)  # 1,0 has [R] and 3,0 has [G, R, G]
+
+        self.assertEqual(message_success, MESSAGES['move_success'])
+        self.assertListEqual(game.show_pieces((1, 0)), ['R'])
+        self.assertListEqual(game.show_pieces((3, 0)), ['G', 'R', 'G'])
 
 
 if __name__ == '__main__':
