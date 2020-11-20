@@ -168,16 +168,19 @@ class FocusGame:
         :return: list of pieces removed
         """
         x, y = cartesian_to_list(position)
-        full_stack = self._board[x][y]  # lol
-        stack_top_no_bottom = self._board[x][y][number_to_remove - 1:]
-        stack_bottom_no_top = self._board[x][y][:-number_to_remove]
 
         if top_or_bottom == 'top':
-            self._board[x][y] = stack_bottom_no_top
-            removed_pieces = stack_top_no_bottom if len(full_stack) != 1 else full_stack  # no bottom means no singleton
+            # note the removed pieces before removal (last n pieces)
+            removed_pieces = self._board[x][y][-number_to_remove:]
+
+            # remove the pieces
+            del(self._board[x][y][-number_to_remove:])
         else:
-            self._board[x][y] = stack_top_no_bottom
-            removed_pieces = stack_bottom_no_top if len(full_stack) != 1 else full_stack  # no top means no singleton
+            # note the removed pieces before removal (first n pieces)
+            removed_pieces = self._board[x][y][:number_to_remove]
+
+            # remove the pieces
+            del(self._board[x][y][:number_to_remove])
 
         return removed_pieces
 
@@ -338,9 +341,6 @@ p1 = ('george', 'G')
 p2 = ('ralph', 'R')
 game = FocusGame(p1, p2)
 
-game.move_piece('ralph', (0, 0), (1, 0), 1)  # 0,0 has nothing and 1, 0 has [R, R]
-game.move_piece('george', (2, 0), (1, 0), 1)  # 2,0 has nothing and 1,0 has [R, R, G]
-game.move_piece('ralph', (5, 0), (4, 0), 1)  # ralph has no more stacks in range of 1,0
-message_success = game.move_piece('george', (1, 0), (3, 0), 2)  # 1,0 has [R] and 3,0 has [G, R, G]
+
 
 
