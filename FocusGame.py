@@ -276,7 +276,7 @@ class FocusGame:
         distance_y = abs(from_y - to_y)  # board coordinates are all guaranteed to be non-negative
         total_distance = distance_x + distance_y
 
-        if total_distance > move_range:  # moving more spaces than allowed?
+        if total_distance > move_range or total_distance < 1:  # moving more/less spaces than allowed?
             return False
 
         # passed all tests; to_position is within legal move range
@@ -338,14 +338,8 @@ p1 = ('george', 'G')
 p2 = ('ralph', 'R')
 game = FocusGame(p1, p2)
 
-message_not_piece = game.move_piece('ralph', (0, 2), (0, 1), 1)
-
 game.move_piece('ralph', (0, 0), (1, 0), 1)  # 0,0 has nothing and 0,1 has [R, R]
-game.move_piece('george', (2, 0), (1, 0), 1)  # 2,0 has nothing and 0,1 has [R, R, G]
-message_invalid_location = game.move_piece('ralph', (0, 0), (0, 1), 1)  # used to be ralph's piece; now empty
-
-
-message_not_piece_2 = game.move_piece('ralph', (0, 1), (0, 2), 1)  # move opponent piece?
+game.move_piece('george', (2, 0), (1, 0), 1)  # 2,0 has nothing and 1,0 has [R, R, G]
 
 message_invalid_location_2 = game.move_piece('george', (0, 1), (0, 1), 1)  # move stack to same location?
 

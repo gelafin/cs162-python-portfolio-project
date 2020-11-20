@@ -74,6 +74,12 @@ class MyTestCase(unittest.TestCase):
 
         self.assertEqual(message_invalid_location, MESSAGES['invalid_location'])
 
+    def test_attempt_moving_piece_to_its_own_location_default_settings(self):
+        game = initialize_basic_game()
+        message_invalid_location = game.move_piece('ralph', (0, 0), (0, 0), 1)
+
+        self.assertEqual(message_invalid_location, MESSAGES['invalid_location'])
+
 
 if __name__ == '__main__':
     unittest.main()
