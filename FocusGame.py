@@ -254,7 +254,7 @@ class FocusGame:
         """
         # enforce that it is the player's turn
         if player_name != self._whose_turn:
-            return 'not your turn'
+            return self._ERROR_MESSAGES['invalid_player_turn']
 
         # enforce valid position; position is within bounds
         if not self.is_in_board(to_position):
