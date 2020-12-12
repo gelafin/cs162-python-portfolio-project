@@ -1,6 +1,6 @@
 # portfolio-project
 
-Following is the description given by instructors (and updated a few times through announcements).
+Following is the description given by instructors (and updated a few times through announcements--see school-constraints branch for a slightly different version).
 
 Write a class named FocusGame for playing an abstract board game called Focus/Domination. You can see the rules [here](https://en.wikipedia.org/wiki/Focus_(board_game)).
 
