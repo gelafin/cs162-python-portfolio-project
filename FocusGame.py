@@ -256,7 +256,7 @@ class FocusGame:
         if player_name != self._whose_turn:
             return self._ERROR_MESSAGES['invalid_player_turn']
 
-        # enforce valid position; position is within bounds
+        # enforce valid to_position; to_position is within bounds
         if not self.is_in_board(to_position):
             return self._ERROR_MESSAGES['invalid_location']
 
@@ -324,6 +324,10 @@ class FocusGame:
         validation_result = self.general_move_validation(player_name, to_position)
         if validation_result is not True:  # validation_result is string if any test failed
             return validation_result
+
+        # enforce valid from_position; from_position is within bounds
+        if not self.is_in_board(from_position):
+            return self._ERROR_MESSAGES['invalid_location']
 
         # enforce valid from_position; from_position is not empty
         if len(self.show_pieces(from_position)) < 1:
